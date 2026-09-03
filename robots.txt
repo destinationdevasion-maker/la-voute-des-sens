@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+
+# Espace de pilotage privé — jamais indexé
+Disallow: /admin/
+Disallow: /modele-bon-cadeau.html
+
+Sitemap: https://lavoutedessens.com/sitemap.xml

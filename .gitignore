@@ -1,0 +1,19 @@
+# ─────────────────────────────────────────────────────────────
+#  NE JAMAIS PUBLIER — un dépôt GitHub Pages gratuit est public.
+#  Tout ce qui est listé ici reste sur votre machine.
+# ─────────────────────────────────────────────────────────────
+
+# Espace de pilotage : liens internes, suivi, codes cadeaux
+admin/
+
+# Modèle de bon cadeau (usage interne)
+modele-bon-cadeau.html
+
+# Sources et outils de build
+src/
+tailwind.config.js
+
+# Système
+.DS_Store
+*.log
+_p_*.html
