@@ -41,14 +41,14 @@
     revealPage();
   } else {
     const hero = $("#heroImg");
-    const minimum = new Promise((r) => setTimeout(r, 1500));
+    const minimum = new Promise((r) => setTimeout(r, 450));
     const heroReady = hero && !hero.complete
       ? new Promise((r) => { hero.addEventListener("load", r, { once: true });
                              hero.addEventListener("error", r, { once: true }); })
       : Promise.resolve();
     Promise.all([minimum, heroReady]).then(revealPage);
     // safety net: never trap the page behind a stalled asset
-    setTimeout(revealPage, 4200);
+    setTimeout(revealPage, 3000);
   }
 
   /* ------------------------------------------------------------ reveals */
