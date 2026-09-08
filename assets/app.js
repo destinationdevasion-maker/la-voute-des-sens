@@ -291,13 +291,12 @@
   }
 
   /* ------------------------------------------------- suivi des intentions */
-  // Chaque clic utile est poussé au dataLayer. Tant qu'aucun outil de mesure
-  // n'est branché, rien n'est envoyé nulle part : les événements s'empilent
-  // simplement en mémoire. Dès que GA4 ou Plausible est ajouté, tout remonte.
+  // Chaque clic utile est poussé au dataLayer et remonté à GA4.
   window.dataLayer = window.dataLayer || [];
 
   const pister = (evenement, details) => {
     window.dataLayer.push({ event: evenement, ...details, page: location.pathname });
+    if (typeof window.gtag === "function") window.gtag("event", evenement, details);
     if (typeof window.plausible === "function") window.plausible(evenement, { props: details });
   };
 
