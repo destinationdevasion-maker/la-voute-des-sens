@@ -85,6 +85,8 @@
 
   /* ------------------------------------- scroll: nav, progress, parallax */
   const nav        = $("#navIsland");
+  // pages sans photo en tête (nav déjà condensé au chargement) gardent ce style en permanence
+  const navAlwaysCondensed = nav?.classList.contains("is-condensed");
   const progress   = $("#progressBar");
   const parallaxEl = $$("[data-parallax]");
 
@@ -95,7 +97,7 @@
     const y   = window.scrollY;
     const max = document.documentElement.scrollHeight - window.innerHeight;
 
-    if (nav) {
+    if (nav && !navAlwaysCondensed) {
       nav.classList.toggle("is-condensed", y > 40);
     }
 
