@@ -290,8 +290,55 @@
     showAfter();
   }
 
+  /* --------------------------------------------------- consentement RGPD */
+  // GA4 ne se charge qu'après acceptation explicite du visiteur.
+  const GA_ID = "G-WS5KTZE0ZB";
+  const CLE_CONSENTEMENT = "lvds_consentement";
+
+  const chargerGA = () => {
+    if (window.gtag) return;
+    window.dataLayer = window.dataLayer || [];
+    window.gtag = function () { window.dataLayer.push(arguments); };
+    window.gtag("js", new Date());
+    window.gtag("config", GA_ID);
+    const s = document.createElement("script");
+    s.async = true;
+    s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
+    document.head.appendChild(s);
+  };
+
+  const initConsentement = () => {
+    const choix = localStorage.getItem(CLE_CONSENTEMENT);
+    if (choix === "accepte") { chargerGA(); return; }
+    if (choix === "refuse") return;
+
+    const bandeau = document.createElement("div");
+    bandeau.className = "cookie-bandeau";
+    bandeau.innerHTML = `
+      <p class="cookie-bandeau__texte">
+        Ce site utilise des cookies de mesure d'audience pour comprendre comment vous le parcourez.
+        <a href="${location.pathname.includes("/blog/") || location.pathname.includes("/legal/") || location.pathname.includes("/en/") ? "../" : ""}legal/cookies.html">En savoir plus</a>
+      </p>
+      <div class="cookie-bandeau__actions">
+        <button type="button" class="btn btn--ghost" data-cookie-refuser>Refuser</button>
+        <button type="button" class="btn btn--solid" data-cookie-accepter>Accepter</button>
+      </div>`;
+    document.body.appendChild(bandeau);
+    requestAnimationFrame(() => bandeau.classList.add("is-visible"));
+
+    const fermer = (choixFait) => {
+      localStorage.setItem(CLE_CONSENTEMENT, choixFait);
+      bandeau.classList.remove("is-visible");
+      setTimeout(() => bandeau.remove(), 500);
+      if (choixFait === "accepte") chargerGA();
+    };
+    bandeau.querySelector("[data-cookie-accepter]").addEventListener("click", () => fermer("accepte"));
+    bandeau.querySelector("[data-cookie-refuser]").addEventListener("click", () => fermer("refuse"));
+  };
+  initConsentement();
+
   /* ------------------------------------------------- suivi des intentions */
-  // Chaque clic utile est poussé au dataLayer et remonté à GA4.
+  // Chaque clic utile est poussé au dataLayer et remonté à GA4 (si consenti).
   window.dataLayer = window.dataLayer || [];
 
   const pister = (evenement, details) => {

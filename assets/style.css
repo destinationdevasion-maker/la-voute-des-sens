@@ -1287,3 +1287,59 @@ a.lang-switch__item:hover { opacity: 0.9; }
   padding: 1.05rem 2rem;
   font-size: 0.76rem;
 }
+
+/* bandeau de consentement cookies */
+.cookie-bandeau {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 90;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+  padding: 1.1rem clamp(1rem, 4vw, 2.5rem);
+  background: rgba(26, 21, 16, 0.94);
+  color: var(--ivory);
+  border-top: 1px solid rgba(248, 246, 243, 0.14);
+  backdrop-filter: blur(16px) saturate(1.3);
+  -webkit-backdrop-filter: blur(16px) saturate(1.3);
+  box-shadow: 0 -20px 50px -28px rgba(0, 0, 0, 0.75);
+  transform: translate3d(0, 100%, 0);
+  transition: transform 0.7s var(--ease-drape);
+}
+
+.cookie-bandeau.is-visible { transform: translate3d(0, 0, 0); }
+
+.cookie-bandeau__texte {
+  margin: 0;
+  max-width: 46rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: rgba(248, 246, 243, 0.82);
+}
+
+.cookie-bandeau__texte a {
+  color: var(--ivory);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cookie-bandeau__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+.cookie-bandeau .btn { padding: 0.65rem 1.4rem; }
+.cookie-bandeau .btn--ghost { color: rgba(248, 246, 243, 0.85); border: 1px solid rgba(248, 246, 243, 0.3); }
+.cookie-bandeau .btn--ghost:hover { border-color: rgba(248, 246, 243, 0.6); }
+.cookie-bandeau .btn--solid { background: var(--champagne); color: var(--charcoal); }
+.cookie-bandeau .btn--solid:hover { background: var(--ivory); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cookie-bandeau { transition: none; }
+}
