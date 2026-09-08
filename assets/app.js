@@ -90,7 +90,6 @@
 
   let lastY   = window.scrollY;
   let ticking = false;
-  let navHidden = false;
 
   const onFrame = () => {
     const y   = window.scrollY;
@@ -98,14 +97,6 @@
 
     if (nav) {
       nav.classList.toggle("is-condensed", y > 40);
-      // hide on scroll down, bring back on scroll up — but never over the hero
-      const goingDown = y > lastY + 4;
-      const goingUp   = y < lastY - 4;
-      if (goingDown && y > window.innerHeight * 0.9 && !navHidden) {
-        nav.classList.add("is-hidden"); navHidden = true;
-      } else if (goingUp && navHidden) {
-        nav.classList.remove("is-hidden"); navHidden = false;
-      }
     }
 
     if (progress && max > 0) {

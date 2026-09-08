@@ -237,6 +237,12 @@ body.is-locked { overflow: hidden; }
 
 .nav-island.is-condensed { color: var(--ink); }
 
+/* le logo ne doit jamais se coller au premier lien du menu */
+.nav-island > a:first-child {
+  flex-shrink: 0;
+  margin-right: clamp(1rem, 3vw, 2.5rem);
+}
+
 /* pill CTA inside the nav inverts with it */
 .nav-island .btn--solid {
   background: var(--ivory);
@@ -1286,6 +1292,21 @@ a.lang-switch__item:hover { opacity: 0.9; }
 .btn--lg {
   padding: 1.05rem 2rem;
   font-size: 0.76rem;
+}
+
+/* repères de la page réservation : toujours en ligne(s), jamais empilés verticalement */
+.reperes-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  text-align: center;
+}
+
+@media (min-width: 640px) {
+  .reperes-grid { grid-template-columns: repeat(3, 1fr); }
+}
+
+@media (min-width: 1024px) {
+  .reperes-grid { grid-template-columns: repeat(5, 1fr); }
 }
 
 /* bandeau de consentement cookies */
