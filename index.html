@@ -23,7 +23,9 @@
 <meta name="twitter:description" content="Une suite privative pour se retrouver, célébrer et s'évader.">
 <meta name="twitter:image" content="assets/img/hero-vault.webp">
 
-<link rel="preload" as="image" href="assets/img/hero-vault.webp" fetchpriority="high">
+<link rel="preload" as="image" href="assets/img/hero-vault.webp" fetchpriority="high"
+      imagesrcset="assets/img/hero-vault-640w.webp 640w, assets/img/hero-vault-960w.webp 960w, assets/img/hero-vault-1280w.webp 1280w, assets/img/hero-vault-1920w.webp 1920w, assets/img/hero-vault.webp 2048w"
+      imagesizes="100vw">
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/CormorantGaramond-300-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="assets/fonts/PlusJakartaSans-200-latin.woff2" crossorigin>
 <!-- Tailwind, compiled and purged (see tailwind.config.js — rebuild with the CLI) -->
@@ -206,7 +208,11 @@
 <section class="relative isolate flex min-h-[100svh] flex-col justify-end overflow-hidden">
 
   <div class="absolute inset-0 -z-10 overflow-hidden">
-    <img src="assets/img/hero-vault.webp" alt="Une invitée en peignoir savoure une coupe de champagne près du bain à remous, sous la voûte de pierre"
+    <img src="assets/img/hero-vault.webp"
+         srcset="assets/img/hero-vault-640w.webp 640w, assets/img/hero-vault-960w.webp 960w, assets/img/hero-vault-1280w.webp 1280w, assets/img/hero-vault-1920w.webp 1920w, assets/img/hero-vault.webp 2048w"
+         sizes="100vw"
+         alt="Une invitée en peignoir savoure une coupe de champagne près du bain à remous, sous la voûte de pierre"
+         width="2048" height="1536"
          class="media media-grade h-[118%] w-full object-cover" id="heroImg" data-parallax="0.18" fetchpriority="high" decoding="async">
     <!-- Keep the golden stone luminous; anchor contrast only where type sits. -->
     <div class="absolute inset-0 bg-charcoal/20"></div>
