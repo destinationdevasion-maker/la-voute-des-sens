@@ -284,51 +284,199 @@
   }
 
   /* --------------------------------------------------- consentement RGPD */
-  // GA4 ne se charge qu'après acceptation explicite du visiteur.
+  // Google Analytics ne se charge qu'après un choix explicite : « Tout accepter »,
+  // ou la case « Mesure d'audience » activée dans « Personnaliser ». Refuser est
+  // aussi simple qu'accepter (un clic, même taille). Le choix est mémorisé 6 mois
+  // puis redemandé, et peut être modifié à tout moment via « Gérer les cookies ».
   const GA_ID = "G-WS5KTZE0ZB";
   const CLE_CONSENTEMENT = "lvds_consentement";
+  const CLE_DATE = "lvds_consentement_date";
+  const VALIDITE_MS = 182 * 24 * 3600 * 1000;   // ~6 mois
+  const COOKIE_GA_SECONDES = 395 * 24 * 3600;   // 13 mois, plafond recommandé par la CNIL
+
+  // racine du site déduite de l'emplacement de ce script (pages à 0, 1 ou 2 niveaux)
+  const racine = (() => {
+    try { return new URL("../", document.currentScript.src).pathname; }
+    catch (e) { return "/"; }
+  })();
+
+  const T = document.documentElement.lang === "en" ? {
+    titre: "Help us improve the site?",
+    texte: "With your consent, we measure how it is used to fix what gets in the way. No advertising, no resale of data.",
+    plus: "Learn more",
+    refuser: "Reject all", perso: "Customize", accepter: "Accept all",
+    prefs: "Your preferences",
+    necessaires: "Necessary cookies", toujours: "Always on",
+    necessairesTxt: "They keep the site, the booking calendar and the payment working, and remember this choice. They measure nothing.",
+    audience: "Audience measurement",
+    audienceTxt: "Google Analytics: pages viewed, journey, clicks on “Book” or WhatsApp. Cookies kept 13 months at most. No advertising, no resale.",
+    enregistrer: "Save my choices", retour: "Back", gerer: "Cookie settings"
+  } : {
+    titre: "Vous nous aidez à améliorer le site ?",
+    texte: "Avec votre accord, nous mesurons comment il est utilisé pour corriger ce qui bloque. Aucune publicité, aucune revente de données.",
+    plus: "En savoir plus",
+    refuser: "Tout refuser", perso: "Personnaliser", accepter: "Tout accepter",
+    prefs: "Vos préférences",
+    necessaires: "Cookies nécessaires", toujours: "Toujours actifs",
+    necessairesTxt: "Ils font fonctionner le site, le calendrier de réservation et le paiement, et mémorisent ce choix. Ils ne mesurent rien.",
+    audience: "Mesure d'audience",
+    audienceTxt: "Google Analytics : pages vues, parcours, clics sur « Réserver » ou WhatsApp. Cookies conservés 13 mois au plus. Aucune publicité, aucune revente.",
+    enregistrer: "Enregistrer mes choix", retour: "Retour", gerer: "Gérer les cookies"
+  };
+
+  const stockage = {
+    lire(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+    ecrire(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* navigation privée */ } }
+  };
 
   const chargerGA = () => {
-    if (window.gtag) return;
+    window["ga-disable-" + GA_ID] = false;
+    const options = { cookie_expires: COOKIE_GA_SECONDES };
+    if (window.gtag) { window.gtag("config", GA_ID, options); return; }
     window.dataLayer = window.dataLayer || [];
     window.gtag = function () { window.dataLayer.push(arguments); };
     window.gtag("js", new Date());
-    window.gtag("config", GA_ID);
+    window.gtag("config", GA_ID, options);
     const s = document.createElement("script");
     s.async = true;
     s.src = `https://www.googletagmanager.com/gtag/js?id=${GA_ID}`;
     document.head.appendChild(s);
   };
 
-  const initConsentement = () => {
-    const choix = localStorage.getItem(CLE_CONSENTEMENT);
-    if (choix === "accepte") { chargerGA(); return; }
-    if (choix === "refuse") return;
-
-    const bandeau = document.createElement("div");
-    bandeau.className = "cookie-bandeau";
-    bandeau.innerHTML = `
-      <p class="cookie-bandeau__texte">
-        Ce site utilise des cookies de mesure d'audience pour comprendre comment vous le parcourez.
-        <a href="${location.pathname.includes("/blog/") || location.pathname.includes("/legal/") || location.pathname.includes("/en/") ? "../" : ""}legal/cookies.html">En savoir plus</a>
-      </p>
-      <div class="cookie-bandeau__actions">
-        <button type="button" class="btn btn--ghost" data-cookie-refuser>Refuser</button>
-        <button type="button" class="btn btn--solid" data-cookie-accepter>Accepter</button>
-      </div>`;
-    document.body.appendChild(bandeau);
-    requestAnimationFrame(() => bandeau.classList.add("is-visible"));
-
-    const fermer = (choixFait) => {
-      localStorage.setItem(CLE_CONSENTEMENT, choixFait);
-      bandeau.classList.remove("is-visible");
-      setTimeout(() => bandeau.remove(), 500);
-      if (choixFait === "accepte") chargerGA();
-    };
-    bandeau.querySelector("[data-cookie-accepter]").addEventListener("click", () => fermer("accepte"));
-    bandeau.querySelector("[data-cookie-refuser]").addEventListener("click", () => fermer("refuse"));
+  // retrait du consentement : on coupe la mesure et on efface les cookies déjà déposés
+  const retirerGA = () => {
+    window["ga-disable-" + GA_ID] = true;
+    const hote = location.hostname;
+    const domaines = ["", `; domain=${hote}`, `; domain=.${hote}`, `; domain=.${hote.split(".").slice(-2).join(".")}`];
+    document.cookie.split(";").map((c) => c.split("=")[0].trim())
+      .filter((n) => n === "_ga" || n === "_gid" || n.startsWith("_ga_") || n.startsWith("_gat"))
+      .forEach((n) => domaines.forEach((d) => {
+        document.cookie = `${n}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/${d}`;
+      }));
   };
-  initConsentement();
+
+  // choix mémorisé et encore valable, sinon null (jamais répondu, ou plus de 6 mois)
+  const choixValide = () => {
+    const choix = stockage.lire(CLE_CONSENTEMENT);
+    if (choix !== "accepte" && choix !== "refuse") return null;
+    const date = Number(stockage.lire(CLE_DATE));
+    if (!date) { stockage.ecrire(CLE_DATE, String(Date.now())); return choix; } // réponses d'avant la date
+    return Date.now() - date > VALIDITE_MS ? null : choix;
+  };
+
+  let carte = null;
+  let declencheur = null;
+
+  const fermer = () => {
+    if (!carte) return;
+    const c = carte;
+    carte = null;
+    c.classList.remove("is-visible");
+    setTimeout(() => c.remove(), 600);
+    if (declencheur && document.contains(declencheur)) declencheur.focus();
+    declencheur = null;
+  };
+
+  const enregistrer = (accepte) => {
+    stockage.ecrire(CLE_CONSENTEMENT, accepte ? "accepte" : "refuse");
+    stockage.ecrire(CLE_DATE, String(Date.now()));
+    if (accepte) chargerGA(); else retirerGA();
+    fermer();
+  };
+
+  const ouvrir = (manuel) => {
+    if (carte) { carte.focus(); return; }
+    const actuel = choixValide();
+    declencheur = manuel ? document.activeElement : null;
+
+    const c = document.createElement("div");
+    c.className = "cc";
+    c.setAttribute("role", "dialog");
+    c.setAttribute("aria-modal", "false");
+    c.setAttribute("aria-labelledby", "cc-titre");
+    c.tabIndex = -1;
+    c.innerHTML = `
+      <div data-vue="accueil">
+        <p class="cc__texte"><strong id="cc-titre">${T.titre}</strong> ${T.texte}
+          <a href="${racine}legal/cookies.html">${T.plus}</a></p>
+        <div class="cc__actions">
+          <button type="button" class="cc__btn" data-cc="refuser">${T.refuser}</button>
+          <button type="button" class="cc__btn" data-cc="perso">${T.perso}</button>
+          <button type="button" class="cc__btn cc__btn--plein" data-cc="accepter">${T.accepter}</button>
+        </div>
+      </div>
+      <div data-vue="prefs" hidden>
+        <p class="cc__titre">${T.prefs}</p>
+        <div class="cc__ligne">
+          <div>
+            <p class="cc__ligne-titre">${T.necessaires}</p>
+            <p class="cc__ligne-texte">${T.necessairesTxt}</p>
+          </div>
+          <span class="cc__etat">${T.toujours}</span>
+        </div>
+        <div class="cc__ligne">
+          <div>
+            <p class="cc__ligne-titre" id="cc-audience">${T.audience}</p>
+            <p class="cc__ligne-texte">${T.audienceTxt}</p>
+          </div>
+          <button type="button" class="cc__switch" role="switch" aria-labelledby="cc-audience" data-cc="audience"><span></span></button>
+        </div>
+        <div class="cc__actions">
+          <button type="button" class="cc__btn" data-cc="retour">${T.retour}</button>
+          <button type="button" class="cc__btn cc__btn--plein" data-cc="enregistrer">${T.enregistrer}</button>
+        </div>
+      </div>`;
+    document.body.appendChild(c);
+    carte = c;
+
+    const vueAccueil = c.querySelector('[data-vue="accueil"]');
+    const vuePrefs = c.querySelector('[data-vue="prefs"]');
+    const interrupteur = c.querySelector('[data-cc="audience"]');
+    interrupteur.setAttribute("aria-checked", actuel === "accepte" ? "true" : "false");
+
+    const montrerPrefs = (oui) => { vueAccueil.hidden = oui; vuePrefs.hidden = !oui; };
+
+    c.addEventListener("click", (e) => {
+      const el = e.target.closest("[data-cc]");
+      if (!el) return;
+      const action = el.dataset.cc;
+      if (action === "accepter") enregistrer(true);
+      else if (action === "refuser") enregistrer(false);
+      else if (action === "perso") { montrerPrefs(true); interrupteur.focus(); }
+      else if (action === "retour") { montrerPrefs(false); c.querySelector('[data-cc="perso"]').focus(); }
+      else if (action === "audience") interrupteur.setAttribute("aria-checked", String(interrupteur.getAttribute("aria-checked") !== "true"));
+      else if (action === "enregistrer") enregistrer(interrupteur.getAttribute("aria-checked") === "true");
+    });
+
+    // Échap ferme la carte seulement quand on la rouvre, jamais comme choix implicite
+    c.addEventListener("keydown", (e) => { if (e.key === "Escape" && actuel) fermer(); });
+
+    requestAnimationFrame(() => {
+      c.classList.add("is-visible");
+      if (manuel) c.focus();
+    });
+  };
+
+  // tout élément [data-cookie-settings] rouvre la carte (pied de page, page cookies)
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest("[data-cookie-settings]")) return;
+    e.preventDefault();
+    ouvrir(true);
+  });
+
+  const mentionPied = $("#year")?.parentElement;
+  if (mentionPied) {
+    const lien = document.createElement("button");
+    lien.type = "button";
+    lien.className = "cc-gerer";
+    lien.setAttribute("data-cookie-settings", "");
+    lien.textContent = T.gerer;
+    mentionPied.append(" · ", lien);
+  }
+
+  const choixInitial = choixValide();
+  if (choixInitial === "accepte") chargerGA();
+  else if (choixInitial === null) ouvrir(false);
 
   /* ------------------------------------------------- suivi des intentions */
   // Chaque clic utile est poussé au dataLayer et remonté à GA4 (si consenti).
