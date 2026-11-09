@@ -54,12 +54,11 @@ Ajoutez `--watch` pendant que vous travaillez pour une recompilation automatique
 - **Aucun lien Airbnb** : tous les CTA renvoient vers la section réservation de la page,
   qui affiche l'e-mail et l'Instagram.
 
-## À compléter avant mise en ligne
+## Mise en ligne ✓
 
-| Emplacement | À remplacer |
-|---|---|
-| Footer → Legal / Privacy / Terms | `href="#"` (repérables par `data-todo`) → vos pages légales |
-| `sitemap.xml`, `robots.txt`, balises `canonical` | `lavoutedessens.com` → votre domaine définitif |
+Le site est en production sur `lavoutedessens.com` (déploiement automatique Hostinger
+à chaque push sur `main`). Les liens légaux du footer et les URLs `sitemap.xml` /
+`robots.txt` / `canonical` pointent déjà vers le domaine définitif.
 
 ## Avis
 
@@ -110,30 +109,22 @@ le problème est en amont — vérifiez d'abord dans SuperHote, puis forcez la s
 > aucune fonction serveur ni clé API n'est nécessaire. **Ne placez jamais une clé API
 > SuperHote dans ces fichiers** — elle serait lisible par tous les visiteurs.
 
-## Mise en ligne
-
 Tous les chemins internes sont **relatifs** : le site fonctionne aussi bien à la racine
-d'un domaine que dans un sous-dossier (`username.github.io/la-voute-des-sens/`).
-
-Avant publication, remplacez `lavoutedessens.com` par votre domaine réel dans :
-`sitemap.xml`, `robots.txt`, les balises `canonical` et `hreflang`, et les données structurées.
+d'un domaine que dans un sous-dossier.
 
 > **Cache** : CSS et JS portent un numéro de version (`?v=…`). À chaque modification de
-> `style.css` ou `app.js`, incrémentez-le dans les 6 fichiers HTML, sinon les visiteurs
-> garderont l'ancienne version en cache.
+> `style.css` ou `app.js`, régénérez le timestamp et remplacez l'ancien `?v=…` par le
+> nouveau dans **toutes** les pages HTML qui le référencent (une quarantaine de fichiers
+> à ce jour, `blog/` compris) — sinon les visiteurs restent bloqués sur l'ancienne version
+> en cache.
 
 ## Bons cadeaux (`bons-cadeaux.html`)
 
 Page complète : trois formules fixes (150 / 250 / 400 €), une formule **à montant libre**,
 le déroulé en trois étapes, les conditions, et un bloc de contact.
 
-**Il reste 4 liens Stripe à brancher** (repérables par `data-todo="stripe-…"`) :
-
-1. Tableau de bord Stripe → **Produits → Créer un produit** (ex. « Bon cadeau — 250 € »).
-2. Pour le montant libre : à l'étape tarification, choisir **« Le client choisit ce qu'il paie »**
-   (*customer chooses price*), avec un montant minimum et un montant suggéré.
-3. Sur chaque produit → **Créer un lien de paiement**. Stripe fournit une URL `buy.stripe.com/…`.
-4. Remplacer les `href="#commander"` des 4 boutons par ces URL.
+**Les 4 liens Stripe sont branchés ✓** (`buy.stripe.com/…`, un par formule : 150 / 250 /
+400 € et montant libre).
 
 > Ces liens sont **publics** : ils sont faits pour figurer dans un site. En revanche,
 > **aucune clé Stripe** (surtout `sk_live_…`) ne doit apparaître dans ces fichiers —
