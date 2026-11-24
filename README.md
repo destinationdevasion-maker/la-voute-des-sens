@@ -146,15 +146,18 @@ Ajoutez ce qui manque (Airbnb en annonce 35).
 
 ## Le blog (`/blog/`)
 
-Trois articles optimisés pour le référencement local, **en français** : votre clientèle
-cherche « spa privatif Lyon » ou « week-end romantique Beaujolais », pas en anglais.
-C'est là qu'est le trafic.
+Une bonne vingtaine d'articles optimisés pour le référencement local, **en français** :
+votre clientèle cherche « spa privatif Lyon » ou « week-end romantique Beaujolais »,
+pas en anglais. C'est là qu'est le trafic.
 
-| Fichier | Requête visée |
+| Fichier (exemples) | Requête visée |
 |---|---|
 | `week-end-romantique-pres-de-lyon.html` | week-end romantique près de Lyon |
 | `suite-avec-jacuzzi-privatif-beaujolais.html` | suite / jacuzzi privatif Beaujolais |
 | `que-faire-a-villefranche-sur-saone-en-couple.html` | que faire à Villefranche-sur-Saône |
+
+> Liste non exhaustive — voir `blog/index.html` ou `sitemap.xml` pour la liste à jour
+> de tous les articles publiés.
 
 Chaque article porte ses balises `title`/`description`, un `canonical`, des données
 structurées `Article` + `BreadcrumbList`, et des liens croisés vers les deux autres.
